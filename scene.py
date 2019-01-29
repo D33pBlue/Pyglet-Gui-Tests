@@ -34,20 +34,25 @@ class Player:
         # self.rot[0] = x
         # self.rot[1] = y
 
+# GRASS_SIDE = ('t2f',(0.12,0.62, 0.25,0.62, 0.25,0.75, 0.12,0.75,))
+# GRASS_UP = ('t2f',(0.25,0.62, 0.38,0.62, 0.38,0.75, 0.25,0.75,))
+# SAND = ('t2f',(0,0, 0.13,0, 0.13,0.13, 0,0.13,))
+GRASS_SIDE = ('t2f',(0.375,0.625, 0.5,0.625, 0.5,0.75, 0.375,0.75,))
+GRASS_UP = ('t2f',(0.5,0.625, 0.625,0.625, 0.625,0.75, 0.5,0.75,))
+SAND = ('t2f',(0,0, 0.13,0, 0.13,0.13, 0,0.13,))
+
 class Model:
     def __init__(self):
         self.batch = pyglet.graphics.Batch()
         x,y,z = 0,0,-1
         X,Y,Z = x+1,y+1,z+1
         tex_coords = ('t2f',(0,0, 1,0, 1,1, 0,1,))
-        self.grass_up = self.get_tex("resources/erba_up.png")
-        self.grass_side = self.get_tex("resources/erba_side.png")
-        self.dirt = self.get_tex("resources/terra.png")
-        self.batch.add(4,GL_QUADS,self.grass_side,('v3f',(X,y,z, x,y,z, x,Y,z, X,Y,z,)),tex_coords)
-        self.batch.add(4,GL_QUADS,self.grass_side,('v3f',(x,y,Z, X,y,Z, X,Y,Z, x,Y,Z,)),tex_coords)
-        self.batch.add(4,GL_QUADS,self.grass_side,('v3f',(x,y,z, x,y,Z, x,Y,Z, x,Y,z,)),tex_coords)
-        self.batch.add(4,GL_QUADS,self.grass_side,('v3f',(X,y,Z, X,y,z, X,Y,z, X,Y,Z,)),tex_coords)
-        self.batch.add(4,GL_QUADS,self.grass_up,('v3f',(x,Y,z, X,Y,z, X,Y,Z, x,Y,Z,)),tex_coords)
+        self.ttex = self.get_tex("resources/tex.png")
+        self.batch.add(4,GL_QUADS,self.ttex,('v3f',(X,y,z, x,y,z, x,Y,z, X,Y,z,)),GRASS_SIDE)
+        self.batch.add(4,GL_QUADS,self.ttex,('v3f',(x,y,Z, X,y,Z, X,Y,Z, x,Y,Z,)),GRASS_SIDE)
+        self.batch.add(4,GL_QUADS,self.ttex,('v3f',(x,y,z, x,y,Z, x,Y,Z, x,Y,z,)),GRASS_SIDE)
+        self.batch.add(4,GL_QUADS,self.ttex,('v3f',(X,y,Z, X,y,z, X,Y,z, X,Y,Z,)),GRASS_SIDE)
+        self.batch.add(4,GL_QUADS,self.ttex,('v3f',(x,Y,z, X,Y,z, X,Y,Z, x,Y,Z,)),GRASS_UP)
 
 
 
@@ -88,7 +93,7 @@ class Window(pyglet.window.Window):
         pyglet.clock.schedule_interval(self.update, 1.0 / TICKS_PER_SEC)
 
         self.model = Model()
-        self.player = Player((0,1.5,2.5),(0,6))
+        self.player = Player((0,0,2.5),(0,6))
 
 
     def push(self,pos,rot):
@@ -109,7 +114,7 @@ class Window(pyglet.window.Window):
         self.player.update(dt,self.keys)
 
     def setLock(self,state): self.lock=state; self.set_exclusive_mouse(state)
-    lock = False; mouse_lock=property(lambda self:self.lock,setLock)
+    lock = True; mouse_lock=property(lambda self:self.lock,setLock)
 
     def on_key_press(self,KEY,MOD):
         if KEY==key.ESCAPE:
@@ -162,6 +167,6 @@ def setup():
 if __name__ == '__main__':
     window = Window(width=800, height=600, caption='Pyglet test', resizable=True)
     # Hide the mouse cursor and prevent the mouse from leaving the window.
-    # window.set_exclusive_mouse(True)
+    window.set_exclusive_mouse(True)
     setup()
     pyglet.app.run()
