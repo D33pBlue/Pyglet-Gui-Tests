@@ -1,10 +1,23 @@
-# import pyglet,math
-# from pyglet.gl import *
-# from pyglet.window import key
 import engine.core as engine
 import engine.camera as camera
 import engine.texture as tex
+import random
 
+
+class Mushroom(engine.Body):
+    def __init__(self,ttex,center):
+        super(Mushroom,self).__init__(ttex,center)
+        self.add_square(tex.MUSHROOM,(-1,0,0, 1,0,0, 1,1,0, -1,1,0,))
+        self.scale_factor = 0.5
+        self.rotation[0]=30.0
+        self.update_batch()
+
+class Ground(engine.Body):
+    def __init__(self,ttex,center):
+        super(Ground,self).__init__(ttex,center)
+        self.add_square(tex.GRASS_UP,(-1,0,-1, 1,0,-1, 1,0,1, -1,0,1,))
+        self.scale_factor = 10.0
+        self.update_batch()
 
 class Block(engine.Body):
     def __init__(self,ttex,center):
@@ -25,21 +38,21 @@ class MineWorld(engine.World):
         super(MineWorld, self).__init__()
         self.ttex = tex.load()
         self.block = Block(self.ttex,(0,0,0))
+        self.add_body(self.block)
         for i in range(-10,10):
             for j in range(-10,10):
-                self.add_body(Block(self.ttex,(i,-2,j)))
-        self.add_body(self.block)
+                self.add_body(Ground(self.ttex,(i*20,-2,j*20)))
+        for _ in range(100):
+            mushroom = Mushroom(self.ttex,(random.randint(-100,100),-2,random.randint(-100,100)))
+            mushroom.rotation[0]=random.uniform(-200.0,200.0)
+            self.add_body(mushroom)
 
     def update(self,dt):
         self.block.center[1]+=0.001
         self.block.update_batch()
 
 if __name__ == '__main__':
-    # window = Window(width=800, height=600, caption='Pyglet test', resizable=True)
-    # Hide the mouse cursor and prevent the mouse from leaving the window.
-    # window.set_exclusive_mouse(True)
-    # setup()
     window = engine.setup("Engine test")
     window.set_world(MineWorld())
-    window.set_camera(camera.FirstPerson())
+    window.set_camera(camera.FirstPerson(pos=(0,0,10    )))
     engine.run()

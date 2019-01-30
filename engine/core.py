@@ -27,6 +27,8 @@ def setup(title,skyColor=(0.5, 0.69, 1.0, 1),fog=True,fogStart=10.0,fogEnd=30.0,
     # as smooth."
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     if fog:
         # Enable fog. Fog "blends a fog color with each rasterized pixel fragment's
         # post-texturing color."
@@ -69,7 +71,7 @@ class World(object):
 class Body(object):
     def __init__(self,tileset,center=(0,0,0),scale_factor=1.0):
         self.center = list(center)
-        # add rotation
+        self.rotation = [0,0]
         self.scale_factor = scale_factor
         self.tileset = tileset
         self.shapes = []
@@ -85,6 +87,8 @@ class Body(object):
 
     def update_batch(self):
         self.batch = pyglet.graphics.Batch()
+        # 180:pi=tot:x
+        radRot = [self.rotation[0]*math.pi/180.0,self.rotation[1]*math.pi/180.0]
         for x in self.shapes:
             n,t,tiles,vrts,tx = x
             vertices = list(vrts)
@@ -94,6 +98,15 @@ class Body(object):
                 vertices[i*3] += self.center[0]
                 vertices[i*3+1] += self.center[1]
                 vertices[i*3+2] += self.center[2]
+                # apply rotations
+                if radRot[0]!=0 or radRot[1]!=0:
+                    lx,ly,lz = vertices[i*3]-self.center[0],vertices[i*3+1]-self.center[1],vertices[i*3+2]-self.center[2]
+                    dx = math.cos(radRot[0])*lx-lx+math.cos(radRot[1])*lx-lx
+                    dz = -math.sin(radRot[0])*lx
+                    dy = math.sin(radRot[1])*lx
+                    vertices[i*3] += dx
+                    vertices[i*3+1] += dy
+                    vertices[i*3+2] += dz
             self.batch.add(n,t,tiles,('v3f',tuple(vertices)),tx)
 
     def draw(self):
